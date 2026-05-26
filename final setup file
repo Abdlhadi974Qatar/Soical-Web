@@ -1,0 +1,17 @@
+#!/bin/bash
+# Social Web - Setup Script
+# ينشئ كل المجلدات والملفات اللازمة
+
+echo "[*] Creating Social Web directory structure..."
+mkdir -p social-web/{server,frontend/{festival,live,shared},shell,reports}
+echo "[+] Done"
+
+echo "[*] Setting permissions..."
+chmod +x social-web/shell/social_web.sh
+chmod -R 755 social-web
+echo "[+] Done"
+
+echo ""
+echo "[+] Social Web framework ready!"
+echo "    To start: cd social-web && ./shell/social_web.sh"
+echo ""
