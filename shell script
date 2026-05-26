@@ -1,0 +1,204 @@
+#!/bin/bash
+# ==============================================================
+# Social Web - Red Team Phishing Awareness Tool
+# Author: Abdlhadi974Qatar
+# Compatibility: Kali Linux | Ubuntu | Parrot | Arch | Termux | macOS
+# ==============================================================
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+PURPLE='\033[0;35m'
+NC='\033[0m' # No Color
+BOLD='\033[1m'
+
+banner() {
+    clear
+    echo -e "${RED}"
+    echo "  ╔══════════════════════════════════════════╗"
+    echo "  ║     ███████  ██████  ██████  ██   █████╗ ██      ██    ██ ║"
+    echo "  ║     ██      ██    ██ ██   ██ ██  ██   ██ ██      ██    ██ ║"
+    echo "  ║     ███████ ██    ██ ██████  ██  ███████ ██      ██    ██ ║"
+    echo "  ║          ██ ██    ██ ██   ██ ██  ██   ██ ██      ██    ██ ║"
+    echo "  ║     ███████  ██████  ██   ██ ██  ██   ██ ███████  ██████  ║"
+    echo "  ║          ██ ██    ██ ██   ██ ██  ██   ██           ██     ║"
+    echo "  ╚══════════════════════════════════════════╝"
+    echo -e "${NC}"
+    echo -e "${RED}${BOLD}         [ Social Web - Red Team Framework ]${NC}"
+    echo -e "${RED}         ═══════════════════════════════════${NC}"
+    echo ""
+}
+
+check_deps() {
+    echo -e "${YELLOW}[*] Checking dependencies...${NC}"
+    
+    local missing=0
+    
+    # Check PHP
+    if ! command -v php &> /dev/null; then
+        echo -e "${RED}[-] PHP not found. Installing...${NC}"
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if command -v apt &> /dev/null; then
+                sudo apt install -y php-cli php-curl 2>/dev/null
+            elif command -v pacman &> /dev/null; then
+                sudo pacman -S php php-curl 2>/dev/null
+            elif command -v dnf &> /dev/null; then
+                sudo dnf install -y php-cli php-curl 2>/dev/null
+            fi
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            if command -v brew &> /dev/null; then
+                brew install php 2>/dev/null
+            fi
+        elif [[ "$OSTYPE" == "linux-android" ]]; then
+            pkg install -y php 2>/dev/null
+        fi
+    else
+        echo -e "${GREEN}[+] PHP: $(php -v | head -n1 | cut -d' ' -f2)${NC}"
+    fi
+    
+    # Check localtunnel/ngrok for public URL
+    if ! command -v ngrok &> /dev/null && ! command -v lt &> /dev/null; then
+        echo -e "${YELLOW}[!] ngrok or localtunnel not found. Install for public URL exposure.${NC}"
+        echo -e "${YELLOW}    Will run on localhost only.${NC}"
+    fi
+}
+
+start_php_server() {
+    local port=$1
+    echo -e "${CYAN}[+] Starting PHP server on port ${port}...${NC}"
+    cd "$(dirname "$0")/server" || exit
+    php -S 0.0.0.0:"$port" > /dev/null 2>&1 &
+    PHP_PID=$!
+    echo -e "${GREEN}[+] PHP server running on http://0.0.0.0:${port}${NC}"
+    cd - > /dev/null || exit
+}
+
+start_ngrok_tunnel() {
+    local port=$1
+    if command -v ngrok &> /dev/null; then
+        echo -e "${YELLOW}[*] Starting ngrok tunnel...${NC}"
+        ngrok http "$port" > /dev/null 2>&1 &
+        NGROK_PID=$!
+        sleep 3
+        local ngrok_url
+        ngrok_url=$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d'"' -f4)
+        echo -e "${GREEN}[+] Ngrok URL: ${ngrok_url}${NC}"
+    fi
+}
+
+start_server() {
+    local port
+    
+    # Kill any existing instances
+    kill_all
+    
+    # Find available port
+    for p in {8080..8090}; do
+        if ! lsof -i :"$p" &> /dev/null 2>&1; then
+            port=$p
+            break
+        fi
+    done
+    
+    if [ -z "$port" ]; then
+        port=8080
+    fi
+    
+    echo ""
+    echo -e "${PURPLE}═══════════════════════════════════════════${NC}"
+    echo -e "${PURPLE}  Starting Social Web Framework${NC}"
+    echo -e "${PURPLE}═══════════════════════════════════════════${NC}"
+    echo ""
+    
+    # Start PHP backend
+    start_php_server "$port"
+    
+    # Ask for ngrok
+    read -p $'\e[33m[*] Expose via ngrok/localtunnel? (y/N): \e[0m' use_tunnel
+    if [[ "$use_tunnel" =~ ^[Yy]$ ]]; then
+        start_ngrok_tunnel "$port"
+    fi
+    
+    echo ""
+    echo -e "${GREEN}${BOLD}[+] Framework is running!${NC}"
+    echo -e "${CYAN}    Local URL:  http://localhost:${port}${NC}"
+    echo -e "${CYAN}    PHP PID:    ${PHP_PID}${NC}"
+    if [ -n "$NGROK_PID" ]; then
+        echo -e "${CYAN}    Ngrok PID:  ${NGROK_PID}${NC}"
+    fi
+    echo ""
+    echo -e "${RED}${BOLD}    Press [Ctrl+C] to stop framework${NC}"
+    echo ""
+    
+    # Monitor for reports
+    monitor_reports
+}
+
+monitor_reports() {
+    local report_dir="$(dirname "$0")/reports"
+    mkdir -p "$report_dir"
+    
+    echo -e "${YELLOW}[*] Monitoring for incoming reports...${NC}"
+    echo -e "${YELLOW}[*] Reports directory: ${report_dir}${NC}"
+    echo ""
+    
+    while true; do
+        local new_files
+        new_files=$(find "$report_dir" -name "*.json" -newer "$report_dir/.last_check" 2>/dev/null)
+        if [ -n "$new_files" ]; then
+            echo -e "${GREEN}[+] NEW REPORT RECEIVED!${NC}"
+            for f in $new_files; do
+                echo -e "${GREEN}    → $(basename "$f")${NC}"
+                cat "$f" 2>/dev/null
+                echo ""
+            done
+        fi
+        touch "$report_dir/.last_check"
+        sleep 2
+    done
+}
+
+kill_all() {
+    kill "$PHP_PID" 2>/dev/null
+    kill "$NGROK_PID" 2>/dev/null
+    pkill -f "php -S 0.0.0.0" 2>/dev/null
+    pkill ngrok 2>/dev/null
+    echo -e "${YELLOW}[*] All processes stopped.${NC}"
+}
+
+# ===== MAIN =====
+banner
+echo -e "${CYAN}${BOLD}[1] Start Framework${NC}"
+echo -e "${CYAN}${BOLD}[2] Stop Framework${NC}"
+echo -e "${CYAN}${BOLD}[3] View Reports${NC}"
+echo -e "${CYAN}${BOLD}[4] Exit${NC}"
+echo ""
+read -p $'\e[36mSelect option: \e[0m' option
+
+case $option in
+    1)
+        check_deps
+        start_server
+        ;;
+    2)
+        kill_all
+        ;;
+    3)
+        if [ -d "$(dirname "$0")/reports" ]; then
+            echo -e "${CYAN}[*] Reports:${NC}"
+            ls -lh "$(dirname "$0")/reports/" 2>/dev/null
+            echo ""
+            read -p $'\e[36mPress Enter to continue...\e[0m' _
+        else
+            echo -e "${YELLOW}[!] No reports directory found.${NC}"
+        fi
+        ;;
+    4)
+        echo -e "${GREEN}[+] Goodbye.${NC}"
+        exit 0
+        ;;
+    *)
+        echo -e "${RED}[-] Invalid option.${NC}"
+        ;;
+esac
